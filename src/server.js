@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
 
+import { getMovies, getMovieById } from './services/movies.js';
+
 import { getEnvVar } from './utils/getEnvVar.js';
 
 export const startServer = () => {
@@ -17,8 +19,29 @@ export const startServer = () => {
     }),
   );
 
-  app.get('/', (req, res) => {
-    res.json({ message: 'Server start successfully' });
+  app.get('/api/movies', async (req, res) => {
+    const data = await getMovies();
+
+    res.json({
+      status: 200,
+      message: 'Success find movies',
+      data,
+    });
+  });
+
+  app.get('/api/movies/:id', async (req, res) => {
+    const { id } = req.params;
+    const data = await getMovieById(id);
+
+    if (!data) {
+      return res.status(404).json({ message: 'Movie not found' });
+    }
+
+    res.json({
+      status: 200,
+      message: 'Success find movie by id',
+      data,
+    });
   });
 
   app.use((req, res) => {
